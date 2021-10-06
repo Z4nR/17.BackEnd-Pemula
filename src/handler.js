@@ -8,16 +8,15 @@ const addBookHandler = (request, h) => {
   const insertedAt = new Date().toISOString()
   const updatedAt = insertedAt
   const finished = pageCount === readPage
-  const reading = !finished
+  let reading = !finished
+
+  if (readPage === 0) {
+    reading = false
+  }
 
   const newBook = {
     id, name, year, author, summary, publisher, pageCount, readPage, finished, reading, insertedAt, updatedAt
   }
-
-  books.push(newBook)
-
-  const isSuccess = books.filter((book) => book.id === id).length > 0
-  const isComplete = name && year && author && summary && publisher && pageCount && readPage && finished && reading && insertedAt && updatedAt
 
   if (!name) {
     const response = h.response({
@@ -37,7 +36,11 @@ const addBookHandler = (request, h) => {
     return response
   }
 
-  if (isSuccess && isComplete) {
+  books.push(newBook)
+
+  const isSuccess = books.filter((book) => book.id === id).length > 0
+
+  if (isSuccess) {
     const response = h.response({
       status: 'success',
       message: 'Buku berhasil ditambahkan',
