@@ -3,6 +3,7 @@ const books = require('./books')
 
 const addBookHandler = (request, h) => {
   const { name, year, author, summary, publisher, pageCount, readPage } = request.payload
+
   const id = nanoid(16)
   const insertedAt = new Date().toISOString()
   const updatedAt = insertedAt
@@ -16,18 +17,7 @@ const addBookHandler = (request, h) => {
   books.push(newBook)
 
   const isSuccess = books.filter((book) => book.id === id).length > 0
-
-  if (isSuccess) {
-    const response = h.response({
-      status: 'success',
-      message: 'Buku berhasil ditambahkan',
-      data: {
-        bookId: id
-      }
-    })
-    response.code(201)
-    return response
-  }
+  const isComplete = name && year && author && summary && publisher && pageCount && readPage && finished && reading && insertedAt && updatedAt
 
   if (!name) {
     const response = h.response({
@@ -47,9 +37,21 @@ const addBookHandler = (request, h) => {
     return response
   }
 
+  if (isSuccess && isComplete) {
+    const response = h.response({
+      status: 'success',
+      message: 'Buku berhasil ditambahkan',
+      data: {
+        bookId: id
+      }
+    })
+    response.code(201)
+    return response
+  }
+
   const response = h.response({
     status: 'fail',
-    message: 'Buku gagal ditambahkan'
+    message: 'Buku gagal ditambahkan. coba lagi'
   })
   response.code(500)
   return response
@@ -90,6 +92,24 @@ const editBookByIdHandler = (request, h) => {
 
   const index = books.findIndex((book) => book.id === bookId)
 
+  if (!name) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal menambahkan buku. Mohon isi nama buku'
+    })
+    response.code(400)
+    return response
+  }
+
+  if (readPage > pageCount) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount'
+    })
+    response.code(400)
+    return response
+  }
+
   if (index !== -1) {
     books[index] = {
       ...books[index],
@@ -108,24 +128,6 @@ const editBookByIdHandler = (request, h) => {
       message: 'Buku berhasil diperbarui'
     })
     response.code(200)
-    return response
-  }
-
-  if (!name) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal menambahkan buku. Mohon isi nama buku'
-    })
-    response.code(400)
-    return response
-  }
-
-  if (readPage > pageCount) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount'
-    })
-    response.code(400)
     return response
   }
 
