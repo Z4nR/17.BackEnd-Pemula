@@ -60,12 +60,58 @@ const addBookHandler = (request, h) => {
   return response
 }
 
-const getAllBooksHandler = () => ({
-  status: 'success',
-  data: {
-    books
+const getAllBooksHandler = (request) => {
+  const { name, reading, finished } = request.query
+
+  if (name) {
+    books.filter((b) => b.name === name)
+    return {
+      status: 'success',
+      data: {
+        books: books.map((book) => ({
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher
+        }))
+      }
+    }
+  } else if (reading) {
+    books.filter((b) => b.reading === reading)
+    return {
+      status: 'success',
+      data: {
+        books: books.map((book) => ({
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher
+        }))
+      }
+    }
+  } else if (finished) {
+    books.filter((b) => b.finished === finished)
+    return {
+      status: 'success',
+      data: {
+        books: books.map((book) => ({
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher
+        }))
+      }
+    }
+  } else {
+    return {
+      status: 'success',
+      data: {
+        books: books.map((book) => ({
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher
+        }))
+      }
+    }
   }
-})
+}
 
 const getBookByIdHandler = (request, h) => {
   const { bookId } = request.params
@@ -98,7 +144,7 @@ const editBookByIdHandler = (request, h) => {
   if (!name) {
     const response = h.response({
       status: 'fail',
-      message: 'Gagal menambahkan buku. Mohon isi nama buku'
+      message: 'Gagal memperbarui buku. Mohon isi nama buku'
     })
     response.code(400)
     return response
@@ -107,7 +153,7 @@ const editBookByIdHandler = (request, h) => {
   if (readPage > pageCount) {
     const response = h.response({
       status: 'fail',
-      message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount'
+      message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount'
     })
     response.code(400)
     return response
