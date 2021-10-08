@@ -7,7 +7,7 @@ const addBookHandler = (request, h) => {
   const id = nanoid(16)
   const insertedAt = new Date().toISOString()
   const updatedAt = insertedAt
-  const finished = pageCount === readPage
+  const finished = readPage === pageCount
   let reading = !finished
 
   if (readPage === 0) {
@@ -60,47 +60,47 @@ const addBookHandler = (request, h) => {
   return response
 }
 
-const getAllBooksHandler = (request) => {
+const getAllBooksHandler = (request, h) => {
   const { name, reading, finished } = request.query
 
   if (name) {
-    books.filter((b) => b.name === name)
-    return {
+    const bookName = books.filter((b) => b.name === name)
+    return h.response({
       status: 'success',
       data: {
-        books: books.map((book) => ({
+        books: bookName.map((book) => ({
           id: book.id,
           name: book.name,
           publisher: book.publisher
         }))
       }
-    }
+    })
   } else if (reading) {
-    books.filter((b) => b.reading === reading)
-    return {
+    const bookReaded = books.filter((b) => Number(b.reading) === Number(reading))
+    return h.response({
       status: 'success',
       data: {
-        books: books.map((book) => ({
+        books: bookReaded.map((book) => ({
           id: book.id,
           name: book.name,
           publisher: book.publisher
         }))
       }
-    }
+    })
   } else if (finished) {
-    books.filter((b) => b.finished === finished)
-    return {
+    const bookFinish = books.filter((b) => Number(b.finished) === Number(finished))
+    return h.response({
       status: 'success',
       data: {
-        books: books.map((book) => ({
+        books: bookFinish.map((book) => ({
           id: book.id,
           name: book.name,
           publisher: book.publisher
         }))
       }
-    }
+    })
   } else {
-    return {
+    return h.response({
       status: 'success',
       data: {
         books: books.map((book) => ({
@@ -109,7 +109,7 @@ const getAllBooksHandler = (request) => {
           publisher: book.publisher
         }))
       }
-    }
+    })
   }
 }
 
@@ -136,8 +136,9 @@ const getBookByIdHandler = (request, h) => {
 
 const editBookByIdHandler = (request, h) => {
   const { bookId } = request.params
-  const { name, year, author, summary, publisher, pageCount, readPage } = request.payload
-  const reading = readPage !== pageCount
+  const { name, year, author, summary, publisher, pageCount, readPage, reading } = request.payload
+  const finished = readPage === pageCount
+  const updatedAt = new Date().toISOString()
 
   const index = books.findIndex((book) => book.id === bookId)
 
@@ -169,7 +170,9 @@ const editBookByIdHandler = (request, h) => {
       publisher,
       pageCount,
       readPage,
-      reading
+      reading,
+      finished,
+      updatedAt
     }
 
     const response = h.response({
